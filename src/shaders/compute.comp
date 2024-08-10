@@ -1,0 +1,189 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+#define WORKGROUP_SIZE 32
+layout(local_size_x = WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) uniform CameraBufferObject {
+  mat4 view;
+  mat4 proj;
+} camera;
+
+layout(set = 1, binding = 0) uniform Time {
+  float deltaTime;
+  float totalTime;
+};
+
+struct Blade {
+  vec4 v0;
+  vec4 v1;
+  vec4 v2;
+  vec4 up;
+};
+
+layout(set = 2, binding = 0) buffer Blades {
+  Blade blades[];
+};
+
+layout(set = 2, binding = 1) buffer CulledBlades {
+  Blade culledBlades[];
+};
+
+layout(set = 2, binding = 2) buffer NumBlades {
+  uint vertexCount;   // Write the number of blades remaining here
+  uint instanceCount; // = 1
+  uint firstVertex;   // = 0
+  uint firstInstance; // = 0
+} numBlades;
+
+bool inbounds(float value, float bounds) {
+  return (value >= -bounds) && (value <= bounds);
+}
+
+float random (vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+vec3 random3(vec3 p) {
+  return fract(sin(vec3(dot(p, vec3(127.1, 311.7, 513.76)),
+  dot(p, vec3(269.5, 183.3, 389.22)),
+  dot(p, vec3(378.1, 210.4, 193.9)))) *
+  43758.5453);
+}
+
+
+void main() {
+  // Reset the number of blades to 0
+  if (gl_GlobalInvocationID.x == 0) {
+    numBlades.vertexCount = 0;
+  }
+  barrier(); // Wait till all threads reach this point
+  uint index = gl_GlobalInvocationID.x;
+
+  Blade CurBlade = blades[index];
+  vec3 CurV0 = CurBlade.v0.xyz;
+  vec3 CurV1 = CurBlade.v1.xyz;
+  vec3 CurV2 = CurBlade.v2.xyz;
+  vec3 CurUp = CurBlade.up.xyz;
+
+  float height= CurBlade.v1.w;
+
+
+  // Collision:
+  vec3 mm = 0.25 * CurV0 + 0.5 * CurV1 + 0.25 * CurV2;
+
+  float bladeheight = CurBlade.v1.w;
+  float Fangle = CurBlade.v0.w;
+
+  // Gravity
+  vec3 gE = normalize(vec3(0, -1, 0)) * 9.8f;
+  vec3 width_dir = vec3(sin(Fangle), 0, cos(Fangle));
+  vec3 front_dir = normalize(cross(CurUp, width_dir));
+  vec3 gF = 0.25 * length(gE) * front_dir;
+  vec3 g = gE + gF;
+
+  // Recovery
+  float stiffness = CurBlade.up.w;
+  vec3 iv2 = CurV0 + normalize(CurUp) * bladeheight;
+  vec3 r = (iv2 - CurV2) * stiffness;
+
+  // Wind pattern
+  // Strong natural wind
+//  vec3 wind_dir_strong = normalize(vec3(1, 0, 1));
+//
+//  float wind_speed_strong = 5.0;
+//  float wind_power_strong = 10.0;
+//  float waveInterval_strong = 1.2;
+//
+//  float wavecoeff_strong = cos((dot(CurV0, wind_dir_strong) - wind_speed_strong * totalTime) / waveInterval_strong);
+//  float fd_strong = 1 - abs(dot(wind_dir_strong, normalize(CurV2 - CurV0)));
+//  float fr_strong = dot((CurV2 - CurV0), CurUp) / bladeheight;
+//  vec3 w_strong = wind_dir_strong * wind_power_strong * wavecoeff_strong * fd_strong * fr_strong;
+
+
+  // Helicopter wind
+    vec3 wind_dir_helicopter = normalize(-vec3(1, 0, 1) + CurV0);
+    vec3 spcenter = 8 * vec3(sin(totalTime), 0, cos(totalTime));
+    float wind_speed_helicopter = 5.0;
+    float wind_power_helicopter = 10.0;
+    float waveInterval_helicopter = 1.2;
+
+    float wavecoeff_helicopter = cos((dot(CurV0, wind_dir_helicopter) - wind_speed_helicopter * totalTime) / waveInterval_helicopter);
+    float fd_helicopter = 1 - abs(dot(wind_dir_helicopter, normalize(CurV2 - CurV0)));
+    float fr_helicopter = dot((CurV2 - CurV0), CurUp) / bladeheight;
+    vec3 w_helicopter = wind_dir_helicopter * wind_power_helicopter * wavecoeff_helicopter * fd_helicopter * fr_helicopter;
+
+
+
+  // Random natural wind
+//  vec3 wind       = random3(CurV0) * 3.0 * sin(totalTime);
+//  float f_d       = 1 - abs(dot(normalize(wind),
+//  normalize(CurV2 - CurV0)));  // directional influence
+//  float f_r       = dot(CurV2 - CurV0, CurUp) / height;         // height ratio
+//  vec3 w_random = wind * f_d * f_r;
+
+
+//  	vec3 w = w_strong; // Use this line for strong natural wind
+     vec3 w = w_helicopter; // Use this line for helicopter wind
+  //  vec3 w = w_random;// Use this line for random natural wind
+
+
+
+  // Total Force
+  vec3 tv2 = (g + r + w) * deltaTime;
+  vec3 fv2 = CurV2 + tv2;
+
+  // State Validation
+  fv2 = fv2 - CurUp * min(dot(CurUp, (fv2 - CurV0)), 0);
+  float l_proj = length(fv2 - CurV0 - CurUp * dot((fv2 - CurV0), CurUp));
+  vec3 fv1 = CurV0 + bladeheight * CurUp * max((1 - l_proj / bladeheight), 0.05 * max(l_proj / bladeheight, 1));
+
+  float L0 = distance(fv2, CurV0);
+  float L1 = distance(fv2, fv1) + distance(fv1, CurV0);
+  float L = (2.0 * L0 + (3.0 - 1.0) * L1) / (3.0 + 1.0);
+  CurBlade.v1.xyz = CurV0 + (bladeheight / L) * (fv1 - CurV0);
+  CurBlade.v2.xyz = CurBlade.v1.xyz + (bladeheight / L) * (fv2 - fv1);
+  blades[index] = CurBlade;
+
+  // Culling
+  CurV1 = CurBlade.v1.xyz;
+  CurV2 = CurBlade.v2.xyz;
+
+  // Orientation culling
+  bool cullorientation = false;
+  vec3 viewdir = normalize((inverse(camera.proj * camera.view) * vec4(0, 0, 1, 0)).xyz);
+  float Epsilon = 0.2;
+  if (abs(dot(normalize(width_dir), viewdir)) < Epsilon) {
+    cullorientation = true;
+  }
+
+  // View-Frustum Culling
+  bool cullviewfrustum = true;
+  vec3 midpt = 0.25 * CurV0 + 0.5 * CurV1 + 0.25 * CurV2;
+  mat4 vp = camera.proj * camera.view;
+  vec4 ndcV0 = vp * vec4(CurV0, 1.0f);
+  vec4 ndcV2 = vp * vec4(CurV2, 1.0f);
+  vec4 ndcmidpt = vp * vec4(midpt, 1.0f);
+  ndcV0 /= ndcV0.w;
+  ndcV2 /= ndcV2.w;
+  ndcmidpt /= ndcmidpt.w;
+  float tolerance = 0.2;
+
+  if (inbounds(ndcV0.x, 1 + tolerance) && inbounds(ndcV0.y, 1 + tolerance) ||
+  inbounds(ndcV2.x, 1 + tolerance) && inbounds(ndcV2.y, 1 + tolerance) ||
+  inbounds(ndcmidpt.x, 1 + tolerance) && inbounds(ndcmidpt.y, 1 + tolerance)) {
+    cullviewfrustum = false;
+  }
+
+  // Distance Culling
+  bool culldis = false;
+  const float d_max = 30.0;
+  vec4 v0CamSpace = camera.view * vec4(CurV0, 1.0);
+  if (-v0CamSpace.z > d_max) {
+    culldis = true;
+  }
+
+  if (!cullorientation && !cullviewfrustum && !culldis) {
+    culledBlades[atomicAdd(numBlades.vertexCount, 1)] = CurBlade;
+  }
+}

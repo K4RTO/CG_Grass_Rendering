@@ -1,0 +1,246 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						5
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "external",
+					"childIndexes" : 
+					[
+						2,
+						4
+					],
+					"jsonFile" : "directory-external-Debug-d8969718d56d94ae4e32.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "external"
+				},
+				{
+					"build" : "external/glfw-3.3.4",
+					"childIndexes" : 
+					[
+						3
+					],
+					"jsonFile" : "directory-external.glfw-3.3.4-Debug-26632de8d58963775a92.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "external/glfw-3.3.4"
+				},
+				{
+					"build" : "external/glfw-3.3.4/src",
+					"jsonFile" : "directory-external.glfw-3.3.4.src-Debug-c8e1380c35393138b53b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 1,
+					"source" : "external/glfw-3.3.4/src",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "external/spdlog-1.9.2",
+					"jsonFile" : "directory-external.spdlog-1.9.2-Debug-f49e8eda1af094e5d5f7.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "external/spdlog-1.9.2",
+					"targetIndexes" : 
+					[
+						8
+					]
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-c94b7c2814d5a21df52c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						9
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						5
+					],
+					"name" : "comp8600-final-project",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						9
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2,
+						3
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4
+					],
+					"name" : "spdlog",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						8
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 5,
+					"id" : "compute.comp.spv::@145eef247bfb46b6828c",
+					"jsonFile" : "target-compute.comp.spv-Debug-7ab8db138fcc3aaef945.json",
+					"name" : "compute.comp.spv",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "glfw::@22524bfd51c2d51a6b38",
+					"jsonFile" : "target-glfw-Debug-4b20768b6613984ba727.json",
+					"name" : "glfw",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "graphics.frag.spv::@145eef247bfb46b6828c",
+					"jsonFile" : "target-graphics.frag.spv-Debug-510e4ed990d49b29acae.json",
+					"name" : "graphics.frag.spv",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "graphics.vert.spv::@145eef247bfb46b6828c",
+					"jsonFile" : "target-graphics.vert.spv-Debug-3f168f08c0a1fea3f92f.json",
+					"name" : "graphics.vert.spv",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "grass.frag.spv::@145eef247bfb46b6828c",
+					"jsonFile" : "target-grass.frag.spv-Debug-2e8646d6c3bb79b53ebf.json",
+					"name" : "grass.frag.spv",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "grass.tesc.spv::@145eef247bfb46b6828c",
+					"jsonFile" : "target-grass.tesc.spv-Debug-a19c15a63de0074fda2f.json",
+					"name" : "grass.tesc.spv",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "grass.tese.spv::@145eef247bfb46b6828c",
+					"jsonFile" : "target-grass.tese.spv-Debug-37361ab18d8affbecaf2.json",
+					"name" : "grass.tese.spv",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "grass.vert.spv::@145eef247bfb46b6828c",
+					"jsonFile" : "target-grass.vert.spv-Debug-d95a801740729d63eace.json",
+					"name" : "grass.vert.spv",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "spdlog::@3ced544bacbff0c0760d",
+					"jsonFile" : "target-spdlog-Debug-06f333bd04667fb35848.json",
+					"name" : "spdlog",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "vulkan_grass_rendering::@145eef247bfb46b6828c",
+					"jsonFile" : "target-vulkan_grass_rendering-Debug-efc60d518848d4791a9e.json",
+					"name" : "vulkan_grass_rendering",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/ClionProject/comp8600-final-project/cmake-build-debug",
+		"source" : "D:/ClionProject/comp8600-final-project"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
